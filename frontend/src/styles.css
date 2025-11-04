@@ -1,0 +1,322 @@
+:root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #f0f6fc;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --radius: 8px;
+    --gap: 1rem;
+    --font: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto, "Segoe UI", sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    font-family: var(--font);
+}
+
+.page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    margin: 0 0 .25rem;
+    font-size: 1.4rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.header .muted {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: .9rem;
+}
+
+.ts {
+    margin-top: .5rem;
+    font-size: .8rem;
+    color: var(--accent);
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+}
+
+.col {
+    flex: 1;
+    min-width: 320px;
+}
+
+.col-wide {
+    flex: 2;
+    min-width: 480px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+.card-header {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.card-header .sub {
+    margin: .25rem 0 0;
+    font-size: .8rem;
+    color: var(--text-dim);
+}
+
+.pair-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    max-height: 400px;
+}
+
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+table.data-table thead {
+    background: rgba(255, 255, 255, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+table.data-table th {
+    text-align: left;
+    font-weight: 500;
+    padding: .6rem .75rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+table.data-table td {
+    padding: .5rem .75rem;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* hover highlight on row */
+.data-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    transition: background 0.2s ease;
+}
+
+/* stacked list of pairs */
+.symbol-tables-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* we always keep them vertical on desktop too */
+@media (min-width: 900px) {
+    .symbol-tables-grid {
+        flex-direction: column;
+    }
+}
+
+/* -------- exchange cell (logo + name) -------- */
+
+.exchange-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0.75rem;
+}
+
+.ex-logo {
+    width: 68px;
+    height: 38px;
+    object-fit: contain;
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 1px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    font-size: 3.7rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.ex-fallback {
+    background: #30363d;
+    color: var(--text);
+}
+
+.ex-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* -------- price cells (bid/ask/etc) -------- */
+
+.price-cell,
+.price-ask {
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.price-cell span {
+    transition: color 0.4s ease;
+}
+
+/* persistent direction colors */
+.dir-up {
+    color: #00ff95;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.dir-down {
+    color: #ff5c5c;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.dir-same {
+    color: var(--text);
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.arrow {
+    font-size: 0.75rem;
+    line-height: 1;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+/* -------- timestamp -------- */
+
+.ts-cell {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding-right: 0.75rem;
+    white-space: nowrap;
+}
+
+/* -------- footer note -------- */
+
+footer.footer {
+    margin-top: 2rem;
+    font-size: .7rem;
+    line-height: 1.4;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+/* -------- responsive tweaks for mobile -------- */
+
+@media (max-width: 640px) {
+    .exchange-cell {
+        gap: 0.4rem;
+    }
+
+    .ex-name {
+        font-size: 0.75rem;
+    }
+
+    .price-cell,
+    .price-ask {
+        font-size: 0.75rem;
+    }
+
+    .arrow {
+        font-size: 0.7rem;
+    }
+}
+
+/* diff/basis coloring */
+.diff-up,
+.basis-up {
+    color: #00ff95;
+    font-weight: 600;
+}
+
+.diff-down,
+.basis-down {
+    color: #ff5c5c;
+    font-weight: 600;
+}
+
+.diff-neutral,
+.basis-neutral {
+    color: var(--text);
+    opacity: 0.85;
+}
+
+/* We apply a single class based on sign for both cells */
+.price-cell.diff-up,
+.basis-cell.diff-up {
+    color: #00ff95;
+    font-weight: 600;
+}
+
+.price-cell.diff-down,
+.basis-cell.diff-down {
+    color: #ff5c5c;
+    font-weight: 600;
+}
+
+.price-cell.diff-neutral,
+.basis-cell.diff-neutral {
+    color: var(--text);
+    opacity: .9;
+}
