@@ -1,27 +1,46 @@
 // services/bybitSpotPoller.js
 import { upsertQuote } from "./priceStore.js";
 import { toCanonical } from "../utils/symbolMap.js";
-import { TRACK_SYMBOLS } from "../config.js";
 
-// Build Bybit symbol list from TRACK_SYMBOLS (USDT-only), e.g. "BTC-USDT" -> "BTCUSDT"
-const BYBIT_POLL_PAIRS = TRACK_SYMBOLS
-    .filter((s) => s.toUpperCase().endsWith("-USDT"))
-    .map((s) => s.replace("-", "").toUpperCase());
+// ✅ Only coins we actually want to track on BYBIT SPOT.
+// You can extend this list as you confirm support.
+const BYBIT_SPOT_LIST = [
+    "BTC-USDT",
+    "ETH-USDT",
+    "SOL-USDT",
+    "XRP-USDT",
+    "ADA-USDT",
+    "DOGE-USDT",
+    "TRX-USDT",
+    "MATIC-USDT",
+    "LTC-USDT",
+    "LINK-USDT",
+    "BCH-USDT",
+    "DOT-USDT",
+    "AVAX-USDT",
+    "TON-USDT",
+];
+
+const BYBIT_POLL_PAIRS = BYBIT_SPOT_LIST.map((s) =>
+    s.replace("-", "").toUpperCase()
+);
 
 // REST endpoint for spot tickers
-const BYBIT_TICKER_URL = "https://api.bybit.com/v5/market/tickers?category=spot&symbol=";
+const BYBIT_TICKER_URL =
+    "https://api.bybit.com/v5/market/tickers?category=spot&symbol=";
 
-// Poll every N ms
 const INTERVAL_MS = 2000;
 
-async function getJson(url, { signal } = {}) {
-    const res = await fetch(url, { signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    return res.json();
-}
+// one-time logs + disabled symbols
+const warned = new Set();
+const disabled = new Set(); // symbols we’ll stop polling (4xx etc.)
 
 export function startBybitSpotPoller() {
-    console.log("[bybit:spot:poll] starting (", BYBIT_POLL_PAIRS.join(", "), ")");
+    console.log(
+        "[bybit:spot:poll] starting (",
+        BYBIT_POLL_PAIRS.join(", "),
+        ")"
+    );
 
     let timer = null;
     let aborter = null;
@@ -30,35 +49,84 @@ export function startBybitSpotPoller() {
         try {
             aborter = new AbortController();
 
-            // sequential & polite (Bybit rate-limits if hammered)
             for (const sym of BYBIT_POLL_PAIRS) {
-                const url = BYBIT_TICKER_URL + encodeURIComponent(sym);
-                const json = await getJson(url, { signal: aborter.signal });
+                if (disabled.has(sym)) continue;
 
-                const list = json?.result?.list;
-                if (!Array.isArray(list) || list.length === 0) continue;
+                try {
+                    const url = BYBIT_TICKER_URL + encodeURIComponent(sym);
+                    const res = await fetch(url, {
+                        signal: aborter.signal,
+                        cache: "no-store",
+                    });
 
-                const d = list[0];
-                const rawSymbol = d.symbol; // "BTCUSDT"
-                const bid = parseFloat(d.bid1Price ?? d.bestBidPrice);
-                const ask = parseFloat(d.ask1Price ?? d.bestAskPrice);
+                    if (!res.ok) {
+                        const key = `${sym}-${res.status}`;
+                        if (!warned.has(key)) {
+                            warned.add(key);
+                            console.warn(
+                                "[bybit:spot:poll] HTTP",
+                                res.status,
+                                "for",
+                                sym,
+                                res.status >= 400 && res.status < 500
+                                    ? "→ disabling this symbol"
+                                    : ""
+                            );
+                        }
+                        if (res.status >= 400 && res.status < 500) {
+                            disabled.add(sym);
+                        }
+                        continue;
+                    }
 
-                if (!rawSymbol || isNaN(bid) || isNaN(ask)) {
-                    // one-time helpful log
-                    console.log("[bybit:spot:poll] missing bid/ask", rawSymbol, "keys:", Object.keys(d));
-                    continue;
+                    const json = await res.json();
+                    const list = json?.result?.list;
+                    if (!Array.isArray(list) || list.length === 0) {
+                        const key = `nodata-${sym}`;
+                        if (!warned.has(key)) {
+                            warned.add(key);
+                            console.warn("[bybit:spot:poll] no data for", sym);
+                        }
+                        continue;
+                    }
+
+                    const d = list[0];
+                    const rawSymbol = d.symbol; // e.g. "BTCUSDT"
+
+                    const bid = parseFloat(d.bid1Price ?? d.bestBidPrice);
+                    const ask = parseFloat(d.ask1Price ?? d.bestAskPrice);
+
+                    if (!rawSymbol || isNaN(bid) || isNaN(ask)) {
+                        const key = `nobidask-${sym}`;
+                        if (!warned.has(key)) {
+                            warned.add(key);
+                            console.warn(
+                                "[bybit:spot:poll] missing bid/ask for",
+                                sym,
+                                "keys:",
+                                Object.keys(d)
+                            );
+                        }
+                        continue;
+                    }
+
+                    const canonical = toCanonical("bybit", rawSymbol, "spot");
+
+                    upsertQuote({
+                        exchange: "bybit",
+                        marketType: "spot",
+                        symbol: canonical,
+                        bid,
+                        ask,
+                        ts: Date.now(),
+                    });
+                } catch (err) {
+                    const key = `error-${sym}`;
+                    if (!warned.has(key)) {
+                        warned.add(key);
+                        console.warn("[bybit:spot:poll] error for", sym, err.message);
+                    }
                 }
-
-                const canonical = toCanonical("bybit", rawSymbol, "spot");
-
-                upsertQuote({
-                    exchange: "bybit",
-                    marketType: "spot",
-                    symbol: canonical,
-                    bid,
-                    ask,
-                    ts: Date.now(),
-                });
             }
         } catch (err) {
             console.log("[bybit:spot:poll] error", err.message);

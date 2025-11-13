@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useCurrency } from "../i18n/CurrencyContext.jsx";
 
 // Local exchange meta (logo + nice label)
-// Make sure the logo files exist in: frontend/public/logos/...
+// Make sure the logo files exist at these paths.
 const EXCHANGE_META = {
     binance: { label: "Binance", logo: "/src/assets/full-binance.png" },
     bybit: { label: "Bybit", logo: "/src/assets/bybit_logo-min.png" },
@@ -96,6 +96,10 @@ function buildPerSymbol(snapshot) {
     return out;
 }
 
+/* =======================
+ * ORIGINAL FULL TABLE
+ * ======================= */
+
 export default function SpotPerpTables({ snapshot, symbolsOrder }) {
     const perSymbol = useMemo(() => buildPerSymbol(snapshot), [snapshot]);
     const { formatPrice } = useCurrency();
@@ -103,7 +107,10 @@ export default function SpotPerpTables({ snapshot, symbolsOrder }) {
     const order =
         symbolsOrder ??
         Object.keys(perSymbol).sort((a, b) => {
-            const prio = (sym) => (sym.startsWith("BTC") ? 0 : sym.startsWith("ETH") ? 1 : 2);
+            const prio = (sym) =>
+                sym.startsWith("BTC") ? 0 :
+                    sym.startsWith("ETH") ? 1 :
+                        sym === "BRL-USDT" ? 2 : 3; // keep BRL near top if present
             const pa = prio(a);
             const pb = prio(b);
             return pa !== pb ? pa - pb : a.localeCompare(b);
@@ -130,7 +137,9 @@ export default function SpotPerpTables({ snapshot, symbolsOrder }) {
                     <div className="card" key={symbol}>
                         <div className="card-header">
                             <h2 className="pair-title">{symbol}</h2>
-                            <p className="sub">Same-exchange comparison: Spot vs Perpetual (real-time)</p>
+                            <p className="sub">
+                                Same-exchange comparison: Spot vs Perpetual (real-time)
+                            </p>
                         </div>
 
                         <div className="table-wrapper">
@@ -149,13 +158,21 @@ export default function SpotPerpTables({ snapshot, symbolsOrder }) {
                                     {rows.map((r, idx) => {
                                         const info = getExchangeInfo(r.exchange);
                                         const cls =
-                                            r.diff == null ? "diff-neutral" : r.diff > 0 ? "diff-up" : "diff-down";
+                                            r.diff == null
+                                                ? "diff-neutral"
+                                                : r.diff > 0
+                                                    ? "diff-up"
+                                                    : "diff-down";
 
                                         return (
                                             <tr key={idx}>
                                                 <td className="exchange-cell">
                                                     {info.logo ? (
-                                                        <img className="ex-logo" src={info.logo} alt={info.label} />
+                                                        <img
+                                                            className="ex-logo"
+                                                            src={info.logo}
+                                                            alt={info.label}
+                                                        />
                                                     ) : (
                                                         <div className="ex-logo ex-fallback">
                                                             {info.label?.[0]?.toUpperCase() || "?"}
@@ -165,23 +182,166 @@ export default function SpotPerpTables({ snapshot, symbolsOrder }) {
                                                 </td>
 
                                                 <td className="price-ask">
-                                                    {r.spot != null ? formatPrice(r.spot, { maxFrac: 4 }) : "—"}
+                                                    {r.spot != null
+                                                        ? formatPrice(r.spot, { maxFrac: 4 })
+                                                        : "—"}
                                                 </td>
 
                                                 <td className="price-ask">
-                                                    {r.perp != null ? formatPrice(r.perp, { maxFrac: 4 }) : "—"}
+                                                    {r.perp != null
+                                                        ? formatPrice(r.perp, { maxFrac: 4 })
+                                                        : "—"}
                                                 </td>
 
                                                 <td className={`price-cell ${cls}`}>
-                                                    {r.diff != null ? formatPrice(r.diff, { maxFrac: 4 }) : "—"}
+                                                    {r.diff != null
+                                                        ? formatPrice(r.diff, { maxFrac: 4 })
+                                                        : "—"}
                                                 </td>
 
                                                 <td className={`basis-cell ${cls}`}>
-                                                    {r.basisPct != null ? `${r.basisPct.toFixed(3)}%` : "—"}
+                                                    {r.basisPct != null
+                                                        ? `${r.basisPct.toFixed(3)}%`
+                                                        : "—"}
                                                 </td>
 
                                                 <td className="ts-cell">
-                                                    {r.ts ? new Date(r.ts).toLocaleTimeString() : "—"}
+                                                    {r.ts
+                                                        ? new Date(r.ts).toLocaleTimeString()
+                                                        : "—"}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+/* =======================
+ * NEW: PROFITS-ONLY TABLE
+ * ======================= */
+
+export function SpotPerpProfitsTable({ snapshot, symbolsOrder }) {
+    const perSymbol = useMemo(() => buildPerSymbol(snapshot), [snapshot]);
+    const { formatPrice } = useCurrency();
+
+    const baseOrder =
+        symbolsOrder ??
+        Object.keys(perSymbol).sort((a, b) => {
+            const prio = (sym) =>
+                sym.startsWith("BTC") ? 0 :
+                    sym.startsWith("ETH") ? 1 :
+                        sym === "BRL-USDT" ? 2 : 3;
+            const pa = prio(a);
+            const pb = prio(b);
+            return pa !== pb ? pa - pb : a.localeCompare(b);
+        });
+
+    // Only keep symbols where at least one exchange has perp > spot
+    const profitableSymbols = baseOrder.filter((symbol) => {
+        const rows = perSymbol[symbol] || [];
+        return rows.some((r) => r.diff != null && r.diff > 0);
+    });
+
+    if (!profitableSymbols.length) {
+        return (
+            <div className="symbol-tables-grid">
+                <div className="card">
+                    <div className="card-header">
+                        <h2>No positive basis right now</h2>
+                        <p className="sub">
+                            Waiting for perpetual price to trade above spot on at least one exchange…
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="symbol-tables-grid">
+            {profitableSymbols.map((symbol) => {
+                const allRows = perSymbol[symbol] || [];
+                const rows = allRows.filter((r) => r.diff != null && r.diff > 0);
+
+                const prettyTitle =
+                    symbol === "BRL-USDT" ? "🇧🇷 BRL / USDT" : symbol;
+
+                return (
+                    <div className="card" key={symbol}>
+                        <div className="card-header">
+                            <h2 className="pair-title">{prettyTitle}</h2>
+                            <p className="sub">
+                                Only exchanges where Perpetual price &gt; Spot price (positive carry)
+                            </p>
+                        </div>
+
+                        <div className="table-wrapper">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Exchange</th>
+                                        <th>Spot (mid)</th>
+                                        <th>Perp (mid)</th>
+                                        <th>Diff</th>
+                                        <th>Basis %</th>
+                                        <th>Last update</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {rows.map((r, idx) => {
+                                        const info = getExchangeInfo(r.exchange);
+                                        return (
+                                            <tr key={idx}>
+                                                <td className="exchange-cell">
+                                                    {info.logo ? (
+                                                        <img
+                                                            className="ex-logo"
+                                                            src={info.logo}
+                                                            alt={info.label}
+                                                        />
+                                                    ) : (
+                                                        <div className="ex-logo ex-fallback">
+                                                            {info.label?.[0]?.toUpperCase() || "?"}
+                                                        </div>
+                                                    )}
+                                                    <span className="ex-name">{info.label}</span>
+                                                </td>
+
+                                                <td className="price-ask">
+                                                    {r.spot != null
+                                                        ? formatPrice(r.spot, { maxFrac: 4 })
+                                                        : "—"}
+                                                </td>
+
+                                                <td className="price-ask">
+                                                    {r.perp != null
+                                                        ? formatPrice(r.perp, { maxFrac: 4 })
+                                                        : "—"}
+                                                </td>
+
+                                                <td className="price-cell diff-up">
+                                                    {r.diff != null
+                                                        ? formatPrice(r.diff, { maxFrac: 4 })
+                                                        : "—"}
+                                                </td>
+
+                                                <td className="basis-cell diff-up">
+                                                    {r.basisPct != null
+                                                        ? `${r.basisPct.toFixed(3)}%`
+                                                        : "—"}
+                                                </td>
+
+                                                <td className="ts-cell">
+                                                    {r.ts
+                                                        ? new Date(r.ts).toLocaleTimeString()
+                                                        : "—"}
                                                 </td>
                                             </tr>
                                         );

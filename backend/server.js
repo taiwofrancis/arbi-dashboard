@@ -12,7 +12,7 @@ import { startBinanceSpot } from "./services/binanceSpot.js";
 import { startBinanceFutures } from "./services/binanceFutures.js";
 
 import { startBybitSpotPoller } from "./services/bybitSpotPoller.js";
-import { startBybitFutures } from "./services/bybitFutures.js";
+import { startBybitFuturesPoller } from "./services/bybitFuturesPoller.js";
 
 import { startMexcSpotPoller } from "./services/mexcSpotPoller.js";
 import { startMexcFuturesPoller } from "./services/mexcFuturesPoller.js";
@@ -91,7 +91,7 @@ startBinanceSpot();
 startBinanceFutures();
 
 startBybitSpotPoller();
-startBybitFutures();
+startBybitFuturesPoller();
 
 startMexcSpotPoller();
 startMexcFuturesPoller();

@@ -320,3 +320,21 @@ footer.footer {
     color: var(--text);
     opacity: .9;
 }
+
+
+
+
+/* green text */
+.profit-cell {
+    color: #4caf50 !important;
+    font-weight: 600;
+}
+
+/* optional: tint whole row */
+.profit-row {
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.profit-row:hover {
+    background: rgba(76, 175, 80, 0.15);
+}

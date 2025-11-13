@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-import SpotPerpTables from "./components/SpotPerpTables.jsx"; // <- NEW
+import SpotPerpTables, { SpotPerpProfitsTable } from "./components/SpotPerpTables.jsx";
 import SpreadsPanel from "./components/SpreadPanel.jsx";
+import ProfitableTable from "./components/ProfitableTable.jsx";
+
 import { useLanguage } from "./i18n/LanguageContext.jsx";
 import { useCurrency } from "./i18n/CurrencyContext.jsx";
 
@@ -81,13 +83,17 @@ function App() {
 
             <main className="grid">
                 <section className="col col-wide">
+                    <ProfitableTable snapshot={snapshot} />
                     <SpotPerpTables snapshot={snapshot} />
                 </section>
 
                 {/* <aside className="col">
-                    <SpreadsPanel spreads={spreads} />
+                    <ProfitableTable snapshot={snapshot} />
                 </aside> */}
             </main>
+
+
+
 
             <footer className="footer" style={{ marginTop: "2rem" }}>
                 {t("footerNote")}
