@@ -9,15 +9,15 @@ import bybitLogo from "../assets/bybit_logo-min.png";
 const EXCHANGE_META = {
     binance: {
         label: "Binance",
-        logo: "src/assets/full-binance.png",
+        logo: binanceLogo,
     },
     bybit: {
         label: "Bybit",
-        logo: "src/assets/bybit_logo-min.png",
+        logo: bybitLogo,
     },
     gate: {
         label: "Gate.io",
-        logo: "src/assets/full-gate-io-logo.png",
+        logo: gateLogo,
     },
     coinbase: {
         label: "Coinbase",
