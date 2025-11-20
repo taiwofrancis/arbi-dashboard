@@ -4,7 +4,7 @@ import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 // all logos now come from public/logos
 const EXCHANGE_META = {
-    binance: { label: "Binance", logo: "/logos/binance.png" },
+    binance: { label: "Binance", logo: "/logos/full-binance.png" },
     bybit: { label: "Bybit", logo: "/logos/bybit_logo-min.png" },
     gate: { label: "Gate.io", logo: "/logos/full-gate-io-logo.png" },
     mexc: { label: "MEXC", logo: "/logos/mexc-logo.png" },
@@ -18,6 +18,7 @@ const EXCHANGE_META = {
 function getExchangeInfo(key) {
     return EXCHANGE_META[key] || { label: key, logo: "/logos/default.png" };
 }
+
 
 // ...inside your component where you render the exchange cell:
 {/* example */ }
