@@ -5,15 +5,18 @@ import { useCurrency } from "../i18n/CurrencyContext.jsx";
 // Local exchange meta (logo + nice label)
 // Make sure the logo files exist at these paths.
 const EXCHANGE_META = {
-    binance: { label: "Binance", logo: "/logos/binance.png" },
-    bybit: { label: "Bybit", logo: "/logos/bybit.png" },
-    okx: { label: "OKX", logo: "/logos/okx.png" },
-    gate: { label: "Gate.io", logo: "/logos/gate.png" },
+    binance: { label: "Binance", logo: "/logos/full-binance.png" },
+    bybit: { label: "Bybit", logo: "/logos/bybit_logo-min.png" },
+    gate: { label: "Gate.io", logo: "/logos/full-gate-io-logo.png" },
+    mexc: { label: "MEXC", logo: "/logos/mexc-logo.png" },
+
+    // The rest below are correct only if you actually add the logos later
     coinbase: { label: "Coinbase", logo: "/logos/coinbase.png" },
     kraken: { label: "Kraken", logo: "/logos/kraken.png" },
+    okx: { label: "OKX", logo: "/logos/okx.png" },
     kucoin: { label: "KuCoin", logo: "/logos/kucoin.png" },
-    mexc: { label: "MEXC", logo: "/logos/mexc.png" },
 };
+
 
 function getExchangeInfo(key) {
     return EXCHANGE_META[key] || { label: key, logo: "/logos/default.png" };
