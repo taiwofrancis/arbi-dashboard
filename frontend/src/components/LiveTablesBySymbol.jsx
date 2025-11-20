@@ -1,50 +1,32 @@
 // src/components/LiveTablesBySymbol.jsx
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import binanceLogo from "../assets/full-binance.png";
-import gateLogo from "../assets/full-gate-io-logo.png";
-import bybitLogo from "../assets/bybit_logo-min.png";
 
-// small metadata for logos
+// all logos now come from public/logos
 const EXCHANGE_META = {
-    binance: {
-        label: "Binance",
-        logo: binanceLogo,
-    },
-    bybit: {
-        label: "Bybit",
-        logo: bybitLogo,
-    },
-    gate: {
-        label: "Gate.io",
-        logo: gateLogo,
-    },
-    coinbase: {
-        label: "Coinbase",
-        logo: "https://cryptologos.cc/logos/coinbase-coinbase-logo.svg?v=029",
-    },
-    kraken: {
-        label: "Kraken",
-        logo: "https://cryptologos.cc/logos/kraken-kraken-logo.svg?v=029",
-    },
-    okx: {
-        label: "OKX",
-        logo: "https://cryptologos.cc/logos/okx-okb-logo.svg?v=029",
-    },
-    kucoin: {
-        label: "KuCoin",
-        logo: "https://cryptologos.cc/logos/kucoin-kucoin-logo.svg?v=029",
-    },
+    binance: { label: "Binance", logo: "/logos/binance.png" },
+    bybit: { label: "Bybit", logo: "/logos/bybit_logo-min.png" },
+    gate: { label: "Gate.io", logo: "/logos/full-gate-io-logo.png" },
+    mexc: { label: "MEXC", logo: "/logos/mexc-logo.png" },
+
+    coinbase: { label: "Coinbase", logo: "/logos/coinbase.png" },
+    kraken: { label: "Kraken", logo: "/logos/kraken.png" },
+    okx: { label: "OKX", logo: "/logos/okx.png" },
+    kucoin: { label: "KuCoin", logo: "/logos/kucoin.png" },
 };
 
 function getExchangeInfo(key) {
-    return (
-        EXCHANGE_META[key] || {
-            label: key,
-            logo: "https://cdn-icons-png.flaticon.com/512/565/565547.png",
-        }
-    );
+    return EXCHANGE_META[key] || { label: key, logo: "/logos/default.png" };
 }
+
+// ...inside your component where you render the exchange cell:
+{/* example */ }
+/*
+const info = getExchangeInfo(exchangeKey);
+<img className="ex-logo" src={info.logo} alt={info.label} />
+<span className="ex-name">{info.label}</span>
+*/
+
 
 // Build table rows from backend snapshot (SPOT only)
 function buildRowsPerSymbol(snapshot) {

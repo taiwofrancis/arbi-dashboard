@@ -20,7 +20,7 @@ export const translations = {
         noDataSubtitle: "Waiting for first quotes...",
 
         footerNote:
-            "Educational use only. This is live market data from public exchange feeds. Fees, slippage, transfer time, leverage, liquidation risk, and compliance are not simulated.",
+            "Educational use only. Make sure to understand risks before trading. These are real-time market data from public exchange feeds. transfer time, leverage, liquidation risk, and compliance are not simulated.",
 
         langLabel: "Language",
     },

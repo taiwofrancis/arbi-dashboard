@@ -2,20 +2,22 @@
 import { useMemo } from "react";
 import { useCurrency } from "../i18n/CurrencyContext.jsx";
 
+// src/components/ProfitableTable.jsx
 const EXCHANGE_META = {
-    binance: { label: "Binance", logo: "/src/assets/full-binance.png" },
-    bybit: { label: "Bybit", logo: "/src/assets/bybit_logo-min.png" },
+    binance: { label: "Binance", logo: "/logos/binance.png" },
+    bybit: { label: "Bybit", logo: "/logos/bybit.png" },
     okx: { label: "OKX", logo: "/logos/okx.png" },
     gate: { label: "Gate.io", logo: "/logos/gate.png" },
     coinbase: { label: "Coinbase", logo: "/logos/coinbase.png" },
     kraken: { label: "Kraken", logo: "/logos/kraken.png" },
     kucoin: { label: "KuCoin", logo: "/logos/kucoin.png" },
-    mexc: { label: "MEXC", logo: "/src/assets/mexc-logo.png" },
+    mexc: { label: "MEXC", logo: "/logos/mexc.png" },
 };
 
 function getExchangeInfo(key) {
     return EXCHANGE_META[key] || { label: key, logo: "/logos/default.png" };
 }
+
 
 export default function ProfitableTable({ snapshot }) {
     const { formatPrice } = useCurrency();
